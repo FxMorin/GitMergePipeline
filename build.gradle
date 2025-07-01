@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'ca.fxco.gitmergepipeline'
+version = '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'ca.fxco.gitmergepipeline.GitMergePipeline'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JGit for Git operations
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.2.1.202505142326-r'
+
+    // Jackson for JSON configuration
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
+    // Apache Commons for utility functions
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'commons-io:commons-io:2.14.0'
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.7'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
