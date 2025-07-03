@@ -1,6 +1,8 @@
 package ca.fxco.gitmergepipeline.config;
 
 import ca.fxco.gitmergepipeline.pipeline.*;
+import ca.fxco.gitmergepipeline.rule.Rule;
+import ca.fxco.gitmergepipeline.rule.RuleRegistry;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
@@ -37,6 +39,12 @@ public class ConfigurationLoader {
         // Add custom pipeline types to the object mapper
         Map<String, Class<? extends Pipeline>> pipelines = new PipelineRegistry().getPipelines();
         for (Map.Entry<String, Class<? extends Pipeline>> entry : pipelines.entrySet()) {
+            objectMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
+        }
+
+        // Add custom rule types to the object mapper
+        Map<String, Class<? extends Rule>> rules = new RuleRegistry().getRules();
+        for (Map.Entry<String, Class<? extends Rule>> entry : rules.entrySet()) {
             objectMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
         }
 

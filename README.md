@@ -282,6 +282,10 @@ You can extend GitMergePipeline with custom merge operations by implementing the
 
 You can extend GitMergePipeline with custom pipelines by implementing the `Pipeline` interface and using a Java ServiceLoader mechanism for the `PipelineClassSupplier` interface.
 
+## Extending with Custom Rules
+
+You can extend GitMergePipeline with custom rules by implementing the `Rule` interface and using a Java ServiceLoader mechanism for the `RuleClassSupplier` interface.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

@@ -1,7 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
 import ca.fxco.gitmergepipeline.merge.MergeContext;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
@@ -16,11 +15,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         include = JsonTypeInfo.As.PROPERTY,
         property = "type"
 )
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = FilePatternRule.class, name = "filePattern"),
-        @JsonSubTypes.Type(value = ContentPatternRule.class, name = "contentPattern"),
-        @JsonSubTypes.Type(value = CompositeRule.class, name = "composite")
-})
 public interface Rule {
     
     /**
