@@ -161,10 +161,11 @@ public class GitMergePipeline {
         System.out.println("GitMergePipeline - A configurable Git merge pipeline system");
         System.out.println();
         System.out.println("Usage:");
-        System.out.println("  driver %O %A %B %P   - Run as a Git merge driver");
-        System.out.println("  remerge <base> <current> <other> - Run as a re-merge tool");
-        System.out.println("  tool <local> <remote> <merged> - Run as a merge tool");
-        System.out.println("  help                 - Show this help message");
+        System.out.println("  merge <branch1> <branch2> [--base <baseBranch>] - Run as a git merge replacement");
+        System.out.println("  driver %B %C %O %P                              - Run as a Git merge driver");
+        System.out.println("  remerge <base> <current> <other>                - Run as a re-merge tool");
+        System.out.println("  tool <local> <remote> <merged>                  - Run as a merge tool");
+        System.out.println("  help                                            - Show this help message");
         System.out.println();
         System.out.println("For more information, see the documentation.");
     }
