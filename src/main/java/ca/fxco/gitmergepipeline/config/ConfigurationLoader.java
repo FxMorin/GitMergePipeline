@@ -1,7 +1,9 @@
 package ca.fxco.gitmergepipeline.config;
 
+import ca.fxco.gitmergepipeline.pipeline.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 /**
  * Loads the configuration for the GitMergePipeline from various sources.
@@ -30,6 +33,13 @@ public class ConfigurationLoader {
 
     public ConfigurationLoader() {
         this.objectMapper = new ObjectMapper();
+
+        // Add custom pipeline types to the object mapper
+        Map<String, Class<? extends Pipeline>> pipelines = new PipelineRegistry().getPipelines();
+        for (Map.Entry<String, Class<? extends Pipeline>> entry : pipelines.entrySet()) {
+            objectMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
+        }
+
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -74,7 +84,8 @@ public class ConfigurationLoader {
         }
     }
 
-    private PipelineConfiguration loadFromFile(File file) throws IOException {
+    /// VisibleForTesting
+    protected PipelineConfiguration loadFromFile(File file) throws IOException {
         try {
             return objectMapper.readValue(file, PipelineConfiguration.class);
         } catch (IOException e) {
@@ -83,7 +94,7 @@ public class ConfigurationLoader {
         }
     }
 
-    ///  VisibleForTesting
+    /// VisibleForTesting
     public static PipelineConfiguration createDefaultConfiguration() {
         return new PipelineConfiguration();
     }

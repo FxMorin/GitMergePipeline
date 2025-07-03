@@ -23,6 +23,7 @@ import java.util.Arrays;
  * @author FX
  */
 public class GitMergePipeline {
+
     private static final Logger logger = LoggerFactory.getLogger(GitMergePipeline.class);
 
     // Exit codes

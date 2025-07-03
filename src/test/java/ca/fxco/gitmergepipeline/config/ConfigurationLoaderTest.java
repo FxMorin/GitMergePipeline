@@ -3,7 +3,6 @@ package ca.fxco.gitmergepipeline.config;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.rule.FilePatternRule;
 import ca.fxco.gitmergepipeline.rule.Rule;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -94,7 +93,7 @@ class ConfigurationLoaderTest {
             configurationLoader = new ConfigurationLoader() {
                 @Override
                 public PipelineConfiguration loadConfiguration() throws IOException {
-                    return new ObjectMapper().readValue(configFile.toFile(), PipelineConfiguration.class);
+                    return loadFromFile(configFile.toFile());
                 }
             };
         }

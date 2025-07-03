@@ -278,6 +278,10 @@ The first parameter is the command to execute, and the optional second parameter
 
 You can extend GitMergePipeline with custom merge operations by implementing the `MergeOperation` interface and using the Java ServiceLoader mechanism.
 
+## Extending with Custom Pipelines
+
+You can extend GitMergePipeline with custom pipelines by implementing the `Pipeline` interface and using a Java ServiceLoader mechanism for the `PipelineClassSupplier` interface.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

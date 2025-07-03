@@ -5,7 +5,6 @@ import ca.fxco.gitmergepipeline.merge.MergeResult;
 import ca.fxco.gitmergepipeline.rule.Rule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.io.IOException;
@@ -23,11 +22,6 @@ import java.util.List;
         include = JsonTypeInfo.As.PROPERTY,
         property = "type"
 )
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = StandardPipeline.class, name = "standard"),
-        @JsonSubTypes.Type(value = ConditionalPipeline.class, name = "conditional"),
-        @JsonSubTypes.Type(value = FallbackPipeline.class, name = "fallback")
-})
 public interface Pipeline {
 
     /**
