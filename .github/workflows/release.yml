@@ -25,10 +25,11 @@ jobs:
       - name: Compile native image
         run: |
           ./gradlew nativeCompile check
+          mv build/native/nativeCompile/gitmergepipeline build/native/nativeCompile/GitMergePipeline
 
       - name: Add Executable to release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/native/nativeCompile/gitmergepipeline
+          files: build/native/nativeCompile/GitMergePipeline
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
