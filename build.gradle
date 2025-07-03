@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'ca.fxco.gitmergepipeline'
-version = '0.1.1-SNAPSHOT'
+version = '0.1.2-SNAPSHOT'
 
 application {
     mainClass = 'ca.fxco.gitmergepipeline.GitMergePipeline'
