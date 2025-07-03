@@ -13,7 +13,7 @@ GitMergePipeline is a configurable system for setting up rules and conditions to
 
 ### Prerequisites
 
-- Java 11 or higher
+- Java 21 or higher
 - Git
 
 ### Building from Source
