@@ -17,6 +17,8 @@ jobs:
         with:
           java-version: '21'
           distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
 
       - name: Compile native image
         run: |
