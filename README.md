@@ -218,6 +218,15 @@ To use as a merge tool:
 /path/to/GitMergePipeline/bin/GitMergePipeline tool <local> <remote> <merged>
 ```
 
+### Using as a `git merge` replacement
+
+In some scenarios such as github actions, you may not be able to get the merge driver to work.  
+You can use the `git merge` replacement to run GitMergePipeline as a replacement for `git merge`.  
+
+```
+/path/to/GitMergePipeline/bin/GitMergePipeline merge <branch1> <branch2> [--base <baseBranch>]
+```
+
 ## Pipeline Types
 
 GitMergePipeline supports the following pipeline types:

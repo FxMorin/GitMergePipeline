@@ -2,6 +2,7 @@ package ca.fxco.gitmergepipeline.merge;
 
 import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
+import ca.fxco.gitmergepipeline.utils.MergeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

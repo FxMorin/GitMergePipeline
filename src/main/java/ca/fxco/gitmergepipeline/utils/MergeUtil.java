@@ -1,6 +1,7 @@
-package ca.fxco.gitmergepipeline.merge;
+package ca.fxco.gitmergepipeline.utils;
 
 import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
+import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.pipeline.StandardPipeline;
 import ca.fxco.gitmergepipeline.rule.FilePatternRule;

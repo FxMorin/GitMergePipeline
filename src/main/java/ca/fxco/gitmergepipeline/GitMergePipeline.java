@@ -1,6 +1,7 @@
 package ca.fxco.gitmergepipeline;
 
 import ca.fxco.gitmergepipeline.config.ConfigurationLoader;
+import ca.fxco.gitmergepipeline.merge.MergeBranches;
 import ca.fxco.gitmergepipeline.merge.MergeDriver;
 import ca.fxco.gitmergepipeline.merge.MergeTool;
 import ca.fxco.gitmergepipeline.merge.ReMergeTool;
@@ -41,6 +42,9 @@ public class GitMergePipeline {
         try {
             int exitCode;
             switch (mode) {
+                case "merge":
+                    exitCode = runAsMerge(modeArgs);
+                    break;
                 case "driver":
                     exitCode = runAsMergeDriver(modeArgs);
                     break;
@@ -67,13 +71,36 @@ public class GitMergePipeline {
         }
     }
 
+    static int runAsMerge(String[] args) throws IOException {
+        if (args.length < 2) {
+            System.err.println("Insufficient arguments for merge mode");
+            System.err.println("Usage: merge <branch1> <branch2> [--base <baseBranch>]");
+            return ERROR_INVALID_ARGS;
+        }
+
+        String branch1 = args[0];
+        String branch2 = args[1];
+        String baseBranch = args.length >= 4 && "--base".equals(args[2]) ? args[3] : null;
+
+        if (baseBranch != null) {
+            logger.info("Running as merge for branches: {} & {} on base: {}", branch1, branch2, baseBranch);
+        } else {
+            logger.info("Running as merge for branches: {} & {}", branch1, branch2);
+        }
+
+        ConfigurationLoader configLoader = new ConfigurationLoader();
+        MergeBranches mergeBranches = new MergeBranches(configLoader.loadConfiguration());
+
+        return mergeBranches.merge(branch1, branch2, baseBranch, null) ? SUCCESS : ERROR_EXECUTION;
+    }
+
     static int runAsMergeDriver(String[] args) throws IOException {
         if (args.length < 4) {
             System.err.println("Insufficient arguments for merge driver mode");
-            System.err.println("Usage: driver %O %A %B %P");
-            System.err.println("  %O - Base version path");
-            System.err.println("  %A - Current version path");
-            System.err.println("  %B - Other version path");
+            System.err.println("Usage: driver %B %C %O %P");
+            System.err.println("  %B - Base version path");
+            System.err.println("  %C - Current version path");
+            System.err.println("  %O - Other version path");
             System.err.println("  %P - Path to the file relative to working directory");
             return ERROR_INVALID_ARGS;
         }
