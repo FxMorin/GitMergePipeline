@@ -23,12 +23,10 @@ jobs:
       - name: Compile native image
         run: |
           ./gradlew nativeCompile check
-          mkdir -p dist
-          cp -r build/native/nativeCompile/* dist/
 
-      - name: Upload release assets
-        uses: ghcr/actions@v3.1.0
+      - name: Add Executable to release
+        uses: softprops/action-gh-release@v1
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          commit-or-pr: 'refs/tags/${{ github.ref }}'
-          filepath: './dist/'
+          files: build/native/nativeCompile/gitmergepipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
