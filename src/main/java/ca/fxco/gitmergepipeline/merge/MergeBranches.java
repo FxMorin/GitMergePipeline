@@ -1,19 +1,24 @@
 package ca.fxco.gitmergepipeline.merge;
 
 import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
+import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.utils.GitUtils;
+import ca.fxco.gitmergepipeline.utils.MergeUtil;
 import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -38,44 +43,87 @@ public class MergeBranches {
 
     /**
      * Merges the specified branches.
+     * Uses Octopus strategy.
      *
-     * @param branch1    The first branch to merge
-     * @param branch2    The second branch to merge
      * @param baseBranch The base branch to merge from, or null if the base branch should be determined automatically
      * @param repoDir    The repo directory to use, or null if the current directory should be used
+     * @param branches   The branches to merge
      * @return {@code true} if the merge was successful, otherwise {@code false}
      */
-    public boolean merge(String branch1, String branch2, @Nullable String baseBranch, @Nullable File repoDir) {
+    public boolean merge(@Nullable String baseBranch, @Nullable File repoDir, Collection<String> branches) {
         if (repoDir == null) {
             repoDir = new File(".");
         }
         try (Git git = Git.open(repoDir)) {
             Repository repo = git.getRepository();
-            MergeDriver driver = new MergeDriver(configuration);
 
-            RevCommit base = GitUtils.getCommonAncestor(repo, branch1, branch2, baseBranch);
-            RevCommit commit1 = GitUtils.getCommit(repo, branch1);
-            RevCommit commit2 = GitUtils.getCommit(repo, branch2);
-
-            List<DiffEntry> diffs = GitUtils.getChangedFiles(repo, base, commit1, commit2);
-
-            boolean allSuccessful = true;
-            for (DiffEntry diff : diffs) {
-                String path = diff.getNewPath();
-
-                Path basePath = GitUtils.checkoutFile(repo, base, path);
-                Path branch1Path = GitUtils.checkoutFile(repo, commit1, path);
-                Path branch2Path = GitUtils.checkoutFile(repo, commit2, path);
-                boolean success = driver.merge(basePath, branch1Path, branch2Path, path);
-
-                if (!success) {
-                    allSuccessful = false;
+            // Get commits
+            List<RevCommit> branchCommits = new ArrayList<>();
+            try (RevWalk revWalk = new RevWalk(repo)) {
+                for (String branch : branches) {
+                    ObjectId branchId = repo.resolve(branch);
+                    if (branchId == null) {
+                        logger.error("Branch not found: " + branch);
+                        return false;
+                    }
+                    branchCommits.add(revWalk.parseCommit(branchId));
                 }
             }
-            return allSuccessful;
-        } catch (IOException | GitAPIException e) {
-            logger.error("Error during merge mode", e);
-            return false;
+
+            RevCommit baseCommit;
+            if (baseBranch != null) {
+                ObjectId baseId = repo.resolve(baseBranch);
+                if (baseId == null) {
+                    logger.error("Base branch not found: " + baseBranch);
+                    return false;
+                }
+                try (RevWalk revWalk = new RevWalk(repo)) {
+                    baseCommit = revWalk.parseCommit(baseId);
+                }
+            } else {
+                baseCommit = GitUtils.findCommonAncestor(repo, branchCommits);
+                if (baseCommit == null) {
+                    logger.error("Could not determine common ancestor.");
+                    return false;
+                }
+            }
+
+            List<DiffEntry> changedFiles = GitUtils.getChangedFiles(repo, baseCommit, branchCommits);
+            logger.info("Merging {} files across {} branches.", changedFiles.size(), branches.size());
+
+            for (DiffEntry diff : changedFiles) {
+                String filePath = diff.getNewPath();
+                Path basePath = GitUtils.checkoutFile(repo, baseCommit, filePath);
+
+                Path currentPath = basePath;
+                for (RevCommit commit : branchCommits) {
+                    Path otherPath = GitUtils.checkoutFile(repo, commit, filePath);
+                    MergeContext context = new MergeContext(basePath, currentPath, otherPath, filePath);
+                    Pipeline pipeline = MergeUtil.findPipeline(configuration, context);
+
+                    if (pipeline == null) {
+                        logger.error("No pipeline found for file: " + filePath);
+                        return false;
+                    }
+
+                    MergeResult result = pipeline.execute(context);
+                    if (!result.isSuccess()) {
+                        logger.error("Merge conflict in file: " + filePath);
+                        return false;
+                    }
+
+                    if (result.getOutputPath() != null) {
+                        currentPath = result.getOutputPath();
+                    }
+                }
+
+                // Final merged result is in currentPath
+                Path target = Path.of(filePath);
+                GitUtils.copyFileToWorkingDirectory(currentPath, target);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        return true;
     }
 }

@@ -224,7 +224,7 @@ In some scenarios such as github actions, you may not be able to get the merge d
 You can use the `git merge` replacement to run GitMergePipeline as a replacement for `git merge`.  
 
 ```
-/path/to/GitMergePipeline/bin/GitMergePipeline merge <branch1> <branch2> [--base <baseBranch>]
+/path/to/GitMergePipeline/bin/GitMergePipeline merge <branch1> <branch2> [branch3 ...] [--base <baseBranch>]
 ```
 
 ## Pipeline Types

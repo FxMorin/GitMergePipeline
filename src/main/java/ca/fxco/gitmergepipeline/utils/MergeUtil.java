@@ -44,6 +44,7 @@ public class MergeUtil {
         }
 
         // Try to find a pipeline with a file pattern rule that matches the file path
+        // TODO: Abstract pipelines and rules so that any pipeline and rule can do this
         for (Pipeline pipeline : pipelines) {
             if (pipeline instanceof StandardPipeline standardPipeline) {
 

@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Main entry point for the GitMergePipeline application.
@@ -75,24 +77,30 @@ public class GitMergePipeline {
     static int runAsMerge(String[] args) throws IOException {
         if (args.length < 2) {
             System.err.println("Insufficient arguments for merge mode");
-            System.err.println("Usage: merge <branch1> <branch2> [--base <baseBranch>]");
+            System.err.println("Usage: merge <branch1> <branch2> [branch3 ...] [--base <baseBranch>]");
             return ERROR_INVALID_ARGS;
         }
 
-        String branch1 = args[0];
-        String branch2 = args[1];
-        String baseBranch = args.length >= 4 && "--base".equals(args[2]) ? args[3] : null;
+        List<String> branches = new ArrayList<>();
+        String baseBranch = null;
+        for (int i = 0; i < args.length; i++) {
+            if ("--base".equals(args[i]) && i + 1 < args.length) {
+                baseBranch = args[++i];
+            } else {
+                branches.add(args[i]);
+            }
+        }
 
         if (baseBranch != null) {
-            logger.info("Running as merge for branches: {} & {} on base: {}", branch1, branch2, baseBranch);
+            logger.info("Running as merge for branches: {} on base: {}", String.join(", ", branches), baseBranch);
         } else {
-            logger.info("Running as merge for branches: {} & {}", branch1, branch2);
+            logger.info("Running as merge for branches: {}", String.join(", ", branches));
         }
 
         ConfigurationLoader configLoader = new ConfigurationLoader();
         MergeBranches mergeBranches = new MergeBranches(configLoader.loadConfiguration());
 
-        return mergeBranches.merge(branch1, branch2, baseBranch, null) ? SUCCESS : ERROR_EXECUTION;
+        return mergeBranches.merge(baseBranch, null, branches) ? SUCCESS : ERROR_EXECUTION;
     }
 
     static int runAsMergeDriver(String[] args) throws IOException {
