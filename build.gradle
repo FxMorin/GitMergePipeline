@@ -15,34 +15,6 @@ repositories {
     mavenCentral()
 }
 
-graalvmNative {
-    binaries {
-        main {
-            imageName = "gitmergepipeline"
-            mainClass = "ca.fxco.gitmergepipeline.GitMergePipeline"
-        }
-    }
-    binaries.configureEach {
-        buildArgs.add("--verbose")
-        // These arguments are from google-java-format's core/pom.xml.
-        buildArgs.add("-H:+UnlockExperimentalVMOptions")
-        buildArgs.add("-H:IncludeResourceBundles=com.sun.tools.javac.resources.compiler")
-        buildArgs.add("-H:IncludeResourceBundles=com.sun.tools.javac.resources.javac")
-        buildArgs.add("--no-fallback")
-        buildArgs.add("--initialize-at-build-time=com.sun.tools.javac.file.Locations")
-        buildArgs.add("-H:+ReportExceptionStackTraces")
-        buildArgs.add("-H:-UseContainerSupport")
-        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
-        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
-        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
-        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
-        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
-        buildArgs.add("-march=compatibility")
-    }
-}
-
-
 dependencies {
     // JGit for Git operations
     implementation 'org.eclipse.jgit:org.eclipse.jgit:7.2.1.202505142326-r'
@@ -65,4 +37,30 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = "GitMergePipeline"
+            mainClass = "ca.fxco.gitmergepipeline.GitMergePipeline"
+        }
+    }
+    binaries.configureEach {
+        buildArgs.add("--verbose")
+        buildArgs.add("-H:+UnlockExperimentalVMOptions")
+        buildArgs.add("-H:IncludeResourceBundles=com.sun.tools.javac.resources.compiler")
+        buildArgs.add("-H:IncludeResourceBundles=com.sun.tools.javac.resources.javac")
+        buildArgs.add("--no-fallback")
+        buildArgs.add("--initialize-at-build-time=com.sun.tools.javac.file.Locations")
+        buildArgs.add("-H:+ReportExceptionStackTraces")
+        buildArgs.add("-H:-UseContainerSupport")
+        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
+        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
+        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+        buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+        buildArgs.add("-march=compatibility")
+    }
 }

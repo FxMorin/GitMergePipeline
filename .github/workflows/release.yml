@@ -23,9 +23,7 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Compile native image
-        run: |
-          ./gradlew nativeCompile check
-          mv build/native/nativeCompile/gitmergepipeline build/native/nativeCompile/GitMergePipeline
+        run: ./gradlew nativeCompile check
 
       - name: Add Executable to release
         uses: softprops/action-gh-release@v1
