@@ -40,7 +40,7 @@ public class CommandLineMergeOperation implements MergeOperation {
             return MergeResult.error("No command specified for command-line merge", null);
         }
 
-        logger.info("Executing command-line merge operation");
+        logger.debug("Executing command-line merge operation");
 
         // The first parameter is the command to execute
         String commandTemplate = parameters.getFirst();
@@ -131,11 +131,11 @@ public class CommandLineMergeOperation implements MergeOperation {
 
             // Return result based on exit code
             if (exitCode == 0) {
-                logger.info("Command-line merge successful");
+                logger.debug("Command-line merge successful");
                 return MergeResult.success("Command-line merge successful: " + output, outputPath);
             } else if (exitCode == 1) {
                 // By convention, exit code 1 indicates conflicts
-                logger.info("Command-line merge resulted in conflicts");
+                logger.debug("Command-line merge resulted in conflicts");
                 return MergeResult.conflict("Command-line merge resulted in conflicts: " + errorOutput);
             } else {
                 logger.error("Command-line merge failed with exit code: {}", exitCode);

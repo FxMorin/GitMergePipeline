@@ -33,7 +33,7 @@ public class TakeOtherOperation implements MergeOperation {
     
     @Override
     public MergeResult execute(MergeContext context, List<String> parameters) throws IOException {
-        logger.info("Executing take-other operation");
+        logger.debug("Executing take-other operation");
         
         Path otherPath = context.getOtherPath();
         if (otherPath == null) {
@@ -52,7 +52,7 @@ public class TakeOtherOperation implements MergeOperation {
         // Copy the other file to the output path
         Files.copy(otherPath, outputPath, StandardCopyOption.REPLACE_EXISTING);
         
-        logger.info("Take-other operation successful");
+        logger.debug("Take-other operation successful");
         return MergeResult.success("Take-other operation successful", outputPath);
     }
 }

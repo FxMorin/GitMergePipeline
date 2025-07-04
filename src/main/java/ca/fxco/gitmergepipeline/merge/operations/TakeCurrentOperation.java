@@ -33,7 +33,7 @@ public class TakeCurrentOperation implements MergeOperation {
     
     @Override
     public MergeResult execute(MergeContext context, List<String> parameters) throws IOException {
-        logger.info("Executing take-current operation");
+        logger.debug("Executing take-current operation");
         
         Path currentPath = context.getCurrentPath();
         if (currentPath == null) {
@@ -52,7 +52,7 @@ public class TakeCurrentOperation implements MergeOperation {
             Files.copy(currentPath, outputPath, StandardCopyOption.REPLACE_EXISTING);
         }
         
-        logger.info("Take-current operation successful");
+        logger.debug("Take-current operation successful");
         return MergeResult.success("Take-current operation successful", outputPath);
     }
 }

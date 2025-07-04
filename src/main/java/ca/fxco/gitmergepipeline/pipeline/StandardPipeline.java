@@ -64,7 +64,7 @@ public class StandardPipeline implements Pipeline {
     
     @Override
     public MergeResult execute(MergeContext context) throws IOException {
-        logger.info("Executing pipeline: {}", name);
+        logger.debug("Executing pipeline: {}", name);
         
         for (Step step : steps) {
             if (step.applies(context)) {
@@ -80,7 +80,7 @@ public class StandardPipeline implements Pipeline {
                     MergeResult result = operation.execute(context, step.getParameters());
                     
                     if (!result.isSuccess()) {
-                        logger.info("Pipeline step failed: {}", result.getMessage());
+                        logger.debug("Pipeline step failed: {}", result.getMessage());
                         return result;
                     }
                 } catch (Exception e) {
@@ -92,7 +92,7 @@ public class StandardPipeline implements Pipeline {
             }
         }
         
-        logger.info("Pipeline executed successfully");
+        logger.debug("Pipeline executed successfully");
         return MergeResult.success("Pipeline executed successfully", null);
     }
     

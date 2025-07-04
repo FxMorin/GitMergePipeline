@@ -65,7 +65,7 @@ public class FallbackPipeline implements Pipeline {
 
     @Override
     public MergeResult execute(MergeContext context) throws IOException {
-        logger.info("Executing fallback pipeline: {}", name);
+        logger.debug("Executing fallback pipeline: {}", name);
 
         MergeResult lastResult = null;
 
@@ -85,10 +85,10 @@ public class FallbackPipeline implements Pipeline {
                     lastResult = result;
 
                     if (result.isSuccess()) {
-                        logger.info("Pipeline step succeeded: {}", result.getMessage());
+                        logger.debug("Pipeline step succeeded: {}", result.getMessage());
                         return result; // Return on first success
                     } else {
-                        logger.info("Pipeline step failed: {}, trying next step", result.getMessage());
+                        logger.debug("Pipeline step failed: {}, trying next step", result.getMessage());
                     }
                 } catch (Exception e) {
                     logger.error("Error executing operation: {}", step.getOperation(), e);
@@ -101,15 +101,15 @@ public class FallbackPipeline implements Pipeline {
         }
 
         if (lastResult != null) {
-            logger.info("All pipeline steps failed, returning last result: {}", lastResult.getMessage());
+            logger.debug("All pipeline steps failed, returning last result: {}", lastResult.getMessage());
             return lastResult;
         } else {
             // Check if there are no steps or no applicable steps
             if (steps.isEmpty()) {
-                logger.info("No steps to execute");
+                logger.debug("No steps to execute");
                 return MergeResult.success("No steps to execute", null);
             } else {
-                logger.info("No applicable steps found");
+                logger.debug("No applicable steps found");
                 return MergeResult.success("No applicable steps found", null);
             }
         }

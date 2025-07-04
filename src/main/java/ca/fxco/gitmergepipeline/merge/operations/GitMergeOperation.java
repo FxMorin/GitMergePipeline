@@ -42,7 +42,7 @@ public class GitMergeOperation implements MergeOperation {
     @Override
     public MergeResult execute(MergeContext context, List<String> parameters)
             throws IOException {
-        logger.info("Executing Git merge operation");
+        logger.debug("Executing Git merge operation");
 
         String mergeStrategy = DEFAULT_MERGE_STRATEGY;
         if (parameters != null && !parameters.isEmpty()) {
@@ -113,10 +113,10 @@ public class GitMergeOperation implements MergeOperation {
             Files.copy(mergedFile, outputPath, StandardCopyOption.REPLACE_EXISTING);
 
             if (mergeResult.getMergeStatus().isSuccessful()) {
-                logger.info("Git merge successful");
+                logger.debug("Git merge successful");
                 return MergeResult.success("Git merge successful", outputPath);
             } else {
-                logger.info("Git merge resulted in conflicts: {}", mergeResult.getMergeStatus());
+                logger.debug("Git merge resulted in conflicts: {}", mergeResult.getMergeStatus());
                 return MergeResult.conflict("Git merge resulted in conflicts: " + mergeResult.getMergeStatus());
             }
         } catch (GitAPIException e) {

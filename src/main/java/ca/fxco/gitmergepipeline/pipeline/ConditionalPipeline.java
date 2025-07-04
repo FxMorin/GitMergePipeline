@@ -72,8 +72,8 @@ public class ConditionalPipeline implements Pipeline {
     
     @Override
     public MergeResult execute(MergeContext context) throws IOException {
-        logger.info("Executing conditional pipeline: {}", name);
-        
+        logger.debug("Executing conditional pipeline: {}", name);
+
         for (Branch branch : branches) {
             if (branch.getRule().applies(context)) {
                 logger.debug("Branch rule applies, executing pipeline: {}", branch.getPipeline().getDescription());
@@ -86,7 +86,7 @@ public class ConditionalPipeline implements Pipeline {
             return defaultPipeline.execute(context);
         }
         
-        logger.info("No branch rule applies and no default pipeline, returning success");
+        logger.debug("No branch rule applies and no default pipeline, returning success");
         return MergeResult.success("No branch rule applies and no default pipeline", null);
     }
     
