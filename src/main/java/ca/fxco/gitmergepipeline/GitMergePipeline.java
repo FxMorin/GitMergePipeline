@@ -5,8 +5,10 @@ import ca.fxco.gitmergepipeline.merge.MergeBranches;
 import ca.fxco.gitmergepipeline.merge.MergeDriver;
 import ca.fxco.gitmergepipeline.merge.MergeTool;
 import ca.fxco.gitmergepipeline.merge.ReMergeTool;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.simple.SimpleLogger;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,9 +40,32 @@ public class GitMergePipeline {
             printUsage();
             System.exit(ERROR_INVALID_ARGS);
         }
+        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Warn");
+
 
         String mode = args[0].toLowerCase();
         String[] modeArgs = Arrays.copyOfRange(args, 1, args.length);
+
+        for (int i = 0; i < modeArgs.length; i++) {
+            String arg = modeArgs[i];
+            switch (arg) {
+                case "--quiet", "-q" -> {
+                    modeArgs = ArrayUtils.remove(modeArgs, i);
+                    i--;
+                    System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Error");
+                }
+                case "--verbose", "-v" -> {
+                    modeArgs = ArrayUtils.remove(modeArgs, i);
+                    i--;
+                    System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Info");
+                }
+                case "--debug", "-d" -> {
+                    modeArgs = ArrayUtils.remove(modeArgs, i);
+                    i--;
+                    System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Debug");
+                }
+            }
+        }
 
         try {
             int exitCode;

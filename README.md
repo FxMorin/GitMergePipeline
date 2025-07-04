@@ -227,6 +227,13 @@ You can use the `git merge` replacement to run GitMergePipeline as a replacement
 /path/to/GitMergePipeline/bin/GitMergePipeline merge <branch1> <branch2> [branch3 ...] [--base <baseBranch>]
 ```
 
+## Command Line Arguments
+
+GitMergePipeline supports the following command line arguments:
+- `--quiet`/`-q`: Disables logging except for errors
+- `--verbose`/`-v`: Enables verbose logging
+- `--debug`/`-d`: Enables debug logging
+
 ## Pipeline Types
 
 GitMergePipeline supports the following pipeline types:
