@@ -6,16 +6,21 @@ import ca.fxco.gitmergepipeline.merge.MergeDriver;
 import ca.fxco.gitmergepipeline.merge.MergeTool;
 import ca.fxco.gitmergepipeline.merge.ReMergeTool;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.simple.SimpleLogger;
+import org.slf4j.simple.SimpleLoggerFactory;
+import org.slf4j.spi.LocationAwareLogger;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main entry point for the GitMergePipeline application.
@@ -40,8 +45,7 @@ public class GitMergePipeline {
             printUsage();
             System.exit(ERROR_INVALID_ARGS);
         }
-        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Warn");
-
+        setLogLevel(LocationAwareLogger.WARN_INT);
 
         String mode = args[0].toLowerCase();
         String[] modeArgs = Arrays.copyOfRange(args, 1, args.length);
@@ -52,17 +56,17 @@ public class GitMergePipeline {
                 case "--quiet", "-q" -> {
                     modeArgs = ArrayUtils.remove(modeArgs, i);
                     i--;
-                    System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Error");
+                    setLogLevel(LocationAwareLogger.ERROR_INT);
                 }
                 case "--verbose", "-v" -> {
                     modeArgs = ArrayUtils.remove(modeArgs, i);
                     i--;
-                    System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Info");
+                    setLogLevel(LocationAwareLogger.INFO_INT);
                 }
                 case "--debug", "-d" -> {
                     modeArgs = ArrayUtils.remove(modeArgs, i);
                     i--;
-                    System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "Debug");
+                    setLogLevel(LocationAwareLogger.DEBUG_INT);
                 }
             }
         }
@@ -201,5 +205,25 @@ public class GitMergePipeline {
         System.out.println("  help                                            - Show this help message");
         System.out.println();
         System.out.println("For more information, see the documentation.");
+    }
+
+    private static void setLogLevel(int level) {
+        ILoggerFactory ctx = LoggerFactory.getILoggerFactory();
+        SimpleLoggerFactory factory = (SimpleLoggerFactory) ctx;
+        try {
+            Field loggerMapField = factory.getClass().getDeclaredField("loggerMap");
+            loggerMapField.setAccessible(true);
+            //noinspection unchecked
+            Map<String, Logger> map = (Map<String, Logger>) loggerMapField.get(factory);
+            for (Logger logger : map.values()) {
+                if (logger instanceof SimpleLogger) {
+                    Field currentLogLevelField = logger.getClass().getDeclaredField("currentLogLevel");
+                    currentLogLevelField.setAccessible(true);
+                    currentLogLevelField.set(logger, level);
+                }
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
