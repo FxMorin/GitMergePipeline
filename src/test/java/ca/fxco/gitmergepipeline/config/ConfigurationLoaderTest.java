@@ -45,33 +45,160 @@ class ConfigurationLoaderTest {
         // Create a test configuration file
         String configJson = """
                 {
-                  "rules": {
-                    "javaFiles": {
-                      "type": "filePattern",
-                      "pattern": "*.java",
-                      "isRegex": false,
-                      "caseSensitive": false
-                    }
-                  },
-                  "pipelines": [
-                    {
-                      "type": "standard",
-                      "name": "Java Files Pipeline",
-                      "steps": [
-                        {
-                          "rule": {
-                            "type": "filePattern",
-                            "pattern": "*.java",
-                            "isRegex": false,
-                            "caseSensitive": false
-                          },
-                          "operation": "git-merge",
-                          "parameters": ["recursive"]
-                        }
-                      ]
-                    }
-                  ]
-                }
+                   "rules": {
+                     "javaFiles": {
+                       "type": "filePattern",
+                       "pattern": "*.java",
+                       "isRegex": false,
+                       "caseSensitive": false
+                     },
+                     "xmlFiles": {
+                       "type": "filePattern",
+                       "pattern": "*.xml",
+                       "isRegex": false,
+                       "caseSensitive": false
+                     }
+                   },
+                   "pipelines": [
+                     {
+                       "type": "standard",
+                       "name": "Java Files Pipeline",
+                       "steps": [
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.java",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "operation": "git-merge",
+                           "parameters": ["recursive"]
+                         }
+                       ]
+                     },
+                     {
+                       "type": "fallback",
+                       "name": "XML Files Fallback Pipeline",
+                       "steps": [
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.xml",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "operation": "git-merge",
+                           "parameters": ["recursive"]
+                         },
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.xml",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "operation": "git-merge",
+                           "parameters": ["ours"]
+                         },
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.xml",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "operation": "take-current",
+                           "parameters": []
+                         }
+                       ]
+                     },
+                     {
+                       "type": "conditional",
+                       "name": "Configuration Files Pipeline",
+                       "branches": [
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.properties",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "pipeline": {
+                             "type": "standard",
+                             "name": "Properties Files Pipeline",
+                             "steps": [
+                               {
+                                 "operation": "git-merge",
+                                 "parameters": ["recursive"]
+                               }
+                             ]
+                           }
+                         },
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.yml",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "pipeline": {
+                             "type": "fallback",
+                             "name": "YAML Files Pipeline",
+                             "steps": [
+                               {
+                                 "operation": "git-merge",
+                                 "parameters": ["recursive"]
+                               },
+                               {
+                                 "operation": "take-current",
+                                 "parameters": []
+                               }
+                             ]
+                           }
+                         }
+                       ],
+                       "defaultPipeline": {
+                         "type": "standard",
+                         "name": "Default Config Pipeline",
+                         "steps": [
+                           {
+                             "operation": "take-other",
+                             "parameters": []
+                           }
+                         ]
+                       }
+                     },
+                     {
+                       "type": "standard",
+                       "name": "Default Pipeline",
+                       "steps": [
+                         {
+                           "operation": "git-merge",
+                           "parameters": ["recursive"]
+                         }
+                       ]
+                     },
+                     {
+                       "type": "standard",
+                       "name": "Default Pipeline",
+                       "steps": [
+                         {
+                           "rule": {
+                             "type": "filePattern",
+                             "pattern": "*.json",
+                             "isRegex": false,
+                             "caseSensitive": false
+                           },
+                           "operation": "command-line-merge",
+                           "parameters": [
+                             "echo %CURRENT% > %OUTPUT%",
+                             "30"
+                           ]
+                         }
+                       ]
+                     }
+                   ]
+                 }
                 """;
 
         Path configFile = tempDir.resolve(".gitmergepipeline.json");
@@ -105,7 +232,7 @@ class ConfigurationLoaderTest {
         assertNotNull(configuration);
 
         Map<String, Rule> rules = configuration.getRules();
-        assertEquals(1, rules.size());
+        assertEquals(2, rules.size());
         assertTrue(rules.containsKey("javaFiles"));
         assertInstanceOf(FilePatternRule.class, rules.get("javaFiles"));
 
@@ -115,7 +242,7 @@ class ConfigurationLoaderTest {
         assertFalse(javaFilesRule.isCaseSensitive());
 
         List<Pipeline> pipelines = configuration.getPipelines();
-        assertEquals(1, pipelines.size());
+        assertEquals(5, pipelines.size());
         assertEquals("Java Files Pipeline", pipelines.getFirst().getDescription().replace("Standard pipeline: ", ""));
     }
 }
