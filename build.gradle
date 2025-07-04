@@ -63,4 +63,8 @@ graalvmNative {
         buildArgs.add("-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
         buildArgs.add("-march=compatibility")
     }
+    agent {
+        enabled = true
+        defaultMode = "standard"
+    }
 }
