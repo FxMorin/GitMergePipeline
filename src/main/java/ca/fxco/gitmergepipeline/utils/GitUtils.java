@@ -131,7 +131,9 @@ public class GitUtils {
             Files.createDirectories(target.getParent());
         }
 
-        // Copy the file, replacing existing if necessary
-        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        if (!target.startsWith("/dev/null")) { // TODO: Figure out how this got here
+            // Copy the file, replacing existing if necessary
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 }
