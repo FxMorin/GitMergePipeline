@@ -242,6 +242,7 @@ GitMergePipeline comes with the following built-in merge operations:
 - `git-merge`: Uses the Git merge algorithm to merge files
 - `take-current`: Uses the current version of the file, ignoring the other version
 - `take-other`: Uses the other version of the file, ignoring the current version
+- `keep-base`: Uses the base version of the file, ignoring the current and other version
 - `command-line-merge`: Executes a specified command line to perform the merge
 
 ### Using Command Line Merge
