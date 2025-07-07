@@ -81,6 +81,7 @@ public class MergeOperationRegistry {
         registerOperation(new GitMergeOperation());
         registerOperation(new TakeCurrentOperation());
         registerOperation(new TakeOtherOperation());
+        registerOperation(new KeepBaseOperation());
         registerOperation(new CommandLineMergeOperation());
     }
 
