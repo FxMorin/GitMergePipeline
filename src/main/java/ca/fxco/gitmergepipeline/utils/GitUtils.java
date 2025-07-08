@@ -10,6 +10,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.util.Set;
  * @author FX
  */
 public class GitUtils {
+    private static final Logger logger = LoggerFactory.getLogger(GitUtils.class);
 
     /**
      * Find the common ancestor of the given commits.
@@ -51,6 +54,9 @@ public class GitUtils {
                 walk.markStart(walk.parseCommit(commit));
             }
             return walk.next();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
         }
     }
 
@@ -86,8 +92,12 @@ public class GitUtils {
                             allDiffs.add(diff);
                         }
                     }
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
                 }
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
         return allDiffs;
     }
@@ -109,6 +119,8 @@ public class GitUtils {
             }
             ObjectId blobId = treeWalk.getObjectId(0);
             Files.write(tempFile, repo.open(blobId).getBytes());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
         return tempFile;
     }

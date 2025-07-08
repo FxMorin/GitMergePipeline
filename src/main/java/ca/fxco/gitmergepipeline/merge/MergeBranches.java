@@ -69,6 +69,8 @@ public class MergeBranches {
                     }
                     branchCommits.add(revWalk.parseCommit(branchId));
                 }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
 
             RevCommit baseCommit;
@@ -80,6 +82,9 @@ public class MergeBranches {
                 }
                 try (RevWalk revWalk = new RevWalk(repo)) {
                     baseCommit = revWalk.parseCommit(baseId);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
                 }
             } else {
                 baseCommit = GitUtils.findCommonAncestor(repo, branchCommits);
