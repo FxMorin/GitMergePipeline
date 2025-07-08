@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,7 +120,9 @@ public class MergeBranches {
 
                 // Final merged result is in currentPath
                 Path target = Path.of(filePath);
-                GitUtils.copyFileToWorkingDirectory(currentPath, target);
+                if (diff.getChangeType() != DiffEntry.ChangeType.DELETE) { // Target = /dev/null
+                    GitUtils.copyFileToWorkingDirectory(currentPath, target);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
