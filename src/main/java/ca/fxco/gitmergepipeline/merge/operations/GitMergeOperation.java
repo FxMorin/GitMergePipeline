@@ -55,6 +55,7 @@ public class GitMergeOperation implements MergeOperation {
 
         // Create a temporary directory for the Git repository
         Path tempDir = Files.createTempDirectory("git-merge-");
+        tempDir.toFile().deleteOnExit();
         try {
             // Initialize a Git repository
             org.eclipse.jgit.api.MergeResult mergeResult;
@@ -122,24 +123,6 @@ public class GitMergeOperation implements MergeOperation {
         } catch (GitAPIException e) {
             logger.error("Error during Git merge", e);
             return MergeResult.error("Error during Git merge: " + e.getMessage(), e);
-        } finally {
-            // Clean up the temporary directory
-            deleteDirectory(tempDir);
-        }
-    }
-
-    private void deleteDirectory(Path directory) {
-        try (Stream<Path> stream = Files.walk(directory)) {
-                stream.sorted((a, b) -> -a.compareTo(b))
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            logger.warn("Failed to delete {}: {}", path, e.getMessage());
-                        }
-                    });
-        } catch (IOException e) {
-            logger.warn("Failed to delete directory {}: {}", directory, e.getMessage());
         }
     }
 }
