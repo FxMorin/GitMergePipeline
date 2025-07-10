@@ -14,10 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,7 +109,7 @@ class MergeBranchesTest {
         };
 
         // Create a configuration with the mock pipelines
-        configuration = new PipelineConfiguration(new HashMap<>(), Arrays.asList(successPipeline, failurePipeline));
+        configuration = PipelineConfiguration.onlyPipelines(successPipeline, failurePipeline);
 
         // Create the merge branches
         mergeBranches = new MergeBranches(configuration);
@@ -134,10 +131,7 @@ class MergeBranchesTest {
     @Test
     void mergeWithFailingPipeline() {
         // Create a configuration with only the failure pipeline
-        PipelineConfiguration failureConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Collections.singletonList(configuration.getPipelines().get(1))
-        );
+        PipelineConfiguration failureConfig = PipelineConfiguration.onlyPipelines(configuration.getPipelines().get(1));
 
         MergeBranches failureBranches = new MergeBranches(failureConfig);
 
@@ -186,10 +180,7 @@ class MergeBranchesTest {
         };
 
         // Create a configuration with the pipelines
-        PipelineConfiguration ruleConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Arrays.asList(javaPipeline, txtPipeline)
-        );
+        PipelineConfiguration ruleConfig = PipelineConfiguration.onlyPipelines(javaPipeline, txtPipeline);
 
         MergeBranches ruleBranches = new MergeBranches(ruleConfig);
 

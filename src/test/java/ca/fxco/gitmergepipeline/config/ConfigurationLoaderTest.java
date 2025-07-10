@@ -45,6 +45,12 @@ class ConfigurationLoaderTest {
         // Create a test configuration file
         String configJson = """
                 {
+                   "filters": [
+                     {
+                       "type": "fileMode",
+                       "mode": "regular"
+                     }
+                   ],
                    "rules": {
                      "javaFiles": {
                        "type": "filePattern",

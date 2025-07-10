@@ -1,10 +1,13 @@
 package ca.fxco.gitmergepipeline.config;
 
+import ca.fxco.gitmergepipeline.filter.Filter;
+import ca.fxco.gitmergepipeline.filter.FilterRegistry;
 import ca.fxco.gitmergepipeline.pipeline.*;
 import ca.fxco.gitmergepipeline.rule.Rule;
 import ca.fxco.gitmergepipeline.rule.RuleRegistry;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,24 +34,33 @@ public class ConfigurationLoader {
     private static final String ENV_CONFIG_PATH = "GITMERGEPIPELINE_CONFIG";
     private static final String CONFIG_FILENAME = ".gitmergepipeline.json";
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     public ConfigurationLoader() {
-        this.objectMapper = new ObjectMapper();
+        JsonMapper.Builder jsonMapper = JsonMapper.builder();
 
-        // Add custom pipeline types to the object mapper
-        Map<String, Class<? extends Pipeline>> pipelines = new PipelineRegistry().getPipelines();
-        for (Map.Entry<String, Class<? extends Pipeline>> entry : pipelines.entrySet()) {
-            objectMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
+        // Add custom filter types to the object mapper
+        Map<String, Class<? extends Filter>> filters = new FilterRegistry().getFilters();
+        for (Map.Entry<String, Class<? extends Filter>> entry : filters.entrySet()) {
+            jsonMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
         }
 
         // Add custom rule types to the object mapper
         Map<String, Class<? extends Rule>> rules = new RuleRegistry().getRules();
         for (Map.Entry<String, Class<? extends Rule>> entry : rules.entrySet()) {
-            objectMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
+            jsonMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
         }
 
-        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // Add custom pipeline types to the object mapper
+        Map<String, Class<? extends Pipeline>> pipelines = new PipelineRegistry().getPipelines();
+        for (Map.Entry<String, Class<? extends Pipeline>> entry : pipelines.entrySet()) {
+            jsonMapper.registerSubtypes(new NamedType(entry.getValue(), entry.getKey()));
+        }
+
+        jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
+
+        this.jsonMapper = jsonMapper.build();
     }
 
     /**
@@ -95,7 +107,7 @@ public class ConfigurationLoader {
     /// VisibleForTesting
     protected PipelineConfiguration loadFromFile(File file) throws IOException {
         try {
-            return objectMapper.readValue(file, PipelineConfiguration.class);
+            return jsonMapper.readValue(file, PipelineConfiguration.class);
         } catch (IOException e) {
             logger.error("Error loading configuration from file: {}", file, e);
             throw new IOException("Failed to load configuration from " + file, e);

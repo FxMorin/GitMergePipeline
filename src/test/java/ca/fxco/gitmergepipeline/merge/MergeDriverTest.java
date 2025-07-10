@@ -73,7 +73,7 @@ class MergeDriverTest {
         };
 
         // Create a configuration with the mock pipelines
-        configuration = new PipelineConfiguration(new HashMap<>(), Arrays.asList(successPipeline, failurePipeline));
+        configuration = PipelineConfiguration.onlyPipelines(successPipeline, failurePipeline);
 
         // Create the merge driver
         mergeDriver = new MergeDriver(configuration);
@@ -90,10 +90,7 @@ class MergeDriverTest {
     @Test
     void mergeWithFailingPipeline() throws IOException {
         // Create a configuration with only the failure pipeline
-        PipelineConfiguration failureConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Collections.singletonList(configuration.getPipelines().get(1))
-        );
+        PipelineConfiguration failureConfig = PipelineConfiguration.onlyPipelines(configuration.getPipelines().get(1));
 
         MergeDriver failureDriver = new MergeDriver(failureConfig);
 
@@ -132,10 +129,7 @@ class MergeDriverTest {
         };
 
         // Create a configuration with the pipelines
-        PipelineConfiguration ruleConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Arrays.asList(javaPipeline, txtPipeline)
-        );
+        PipelineConfiguration ruleConfig = PipelineConfiguration.onlyPipelines(javaPipeline, txtPipeline);
 
         MergeDriver ruleDriver = new MergeDriver(ruleConfig);
 

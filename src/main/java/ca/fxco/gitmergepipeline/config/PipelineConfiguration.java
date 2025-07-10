@@ -1,9 +1,12 @@
 package ca.fxco.gitmergepipeline.config;
 
+import ca.fxco.gitmergepipeline.filter.Filter;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.rule.Rule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,20 +20,40 @@ import java.util.Map;
  * @author FX
  */
 public class PipelineConfiguration {
+    private final boolean detectRenames;
+    private final int binaryFileThreshold;
+    private final List<Filter> filters;
     private final Map<String, Rule> rules;
     private final List<Pipeline> pipelines;
+
+    private TreeFilter combinedFilter;
     
     /**
      * Creates a new configuration with the specified rules and pipelines.
-     * 
-     * @param rules Map of rule names to rule definitions
+     *
+     * @param filters   Map of filter names to filter definitions
+     * @param rules     Map of rule names to rule definitions
      * @param pipelines List of pipeline definitions
      */
     @JsonCreator
     public PipelineConfiguration(
+            @JsonProperty("detectRenames") boolean detectRenames,
+            @JsonProperty("binaryFileThreshold") int BinaryFileThreshold,
+            @JsonProperty("filters") List<Filter> filters,
             @JsonProperty("rules") Map<String, Rule> rules,
             @JsonProperty("pipelines") List<Pipeline> pipelines
     ) {
+        this.detectRenames = detectRenames;
+        this.binaryFileThreshold = BinaryFileThreshold;
+        this.filters = filters != null ? filters : new ArrayList<>();
+        this.rules = rules != null ? rules : new HashMap<>();
+        this.pipelines = pipelines != null ? pipelines : new ArrayList<>();
+    }
+
+    public PipelineConfiguration(List<Filter> filters, Map<String, Rule> rules, List<Pipeline> pipelines) {
+        this.detectRenames = true;
+        this.binaryFileThreshold = 200000;
+        this.filters = filters != null ? filters : new ArrayList<>();
         this.rules = rules != null ? rules : new HashMap<>();
         this.pipelines = pipelines != null ? pipelines : new ArrayList<>();
     }
@@ -39,7 +62,47 @@ public class PipelineConfiguration {
      * Creates a new empty configuration.
      */
     public PipelineConfiguration() {
-        this(new HashMap<>(), new ArrayList<>());
+        this(new ArrayList<>(), new HashMap<>(), new ArrayList<>());
+    }
+
+    /**
+     * If true, GitMergePipeline will attempt to detect renames when using JGit.
+     *
+     * @return {@code true} if renames should be detected, otherwise {@code false}
+     */
+    public boolean detectRenames() {
+        return detectRenames;
+    }
+
+    /**
+     * Gets the threshold for binary files when using JGit.
+     *
+     * @return The threshold
+     */
+    public int binaryFileThreshold() {
+        return binaryFileThreshold;
+    }
+
+    /**
+     * Gets the combined tree filter for all filters in the configuration.
+     *
+     * @return The combined tree filter
+     */
+    public TreeFilter getCombinedFilter() {
+        if (combinedFilter == null) {
+            combinedFilter = combineFilters();
+        }
+
+        return combinedFilter;
+    }
+
+    /**
+     * Gets the list of filters.
+     *
+     * @return List of filters
+     */
+    public List<Filter> getFilters() {
+        return filters;
     }
     
     /**
@@ -58,6 +121,16 @@ public class PipelineConfiguration {
      */
     public List<Pipeline> getPipelines() {
         return pipelines;
+    }
+
+    /**
+     * Adds a filter to the configuration.
+     *
+     * @param filter Filter definition
+     */
+    public void addFilter(Filter filter) {
+        filters.add(filter);
+        combinedFilter = null;
     }
     
     /**
@@ -87,5 +160,31 @@ public class PipelineConfiguration {
      */
     public void addPipeline(Pipeline pipeline) {
         pipelines.add(pipeline);
+    }
+
+    private TreeFilter combineFilters() {
+        if (filters.isEmpty()) {
+            return TreeFilter.ALL;
+        }
+        if (filters.size() == 1) {
+            return filters.getFirst().getTreeFilter();
+        }
+        return AndTreeFilter.create(filters
+                .stream()
+                .map(Filter::getTreeFilter)
+                .toArray(TreeFilter[]::new));
+    }
+
+
+    public static PipelineConfiguration onlyFilters(Filter... filters) {
+        return new PipelineConfiguration(List.of(filters), null, null);
+    }
+
+    public static PipelineConfiguration onlyRules(Map<String, Rule> rules) {
+        return new PipelineConfiguration(null, rules, null);
+    }
+
+    public static PipelineConfiguration onlyPipelines(Pipeline... pipelines) {
+        return new PipelineConfiguration(null, null, List.of(pipelines));
     }
 }

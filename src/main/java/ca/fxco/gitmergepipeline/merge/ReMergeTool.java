@@ -15,10 +15,8 @@ import java.nio.file.Path;
  *
  * @author FX
  */
-public class ReMergeTool {
+public class ReMergeTool extends Merger {
     private static final Logger logger = LoggerFactory.getLogger(ReMergeTool.class);
-    
-    private final PipelineConfiguration configuration;
     
     /**
      * Creates a new re-merge tool with the specified configuration.
@@ -26,7 +24,7 @@ public class ReMergeTool {
      * @param configuration The pipeline configuration to use
      */
     public ReMergeTool(PipelineConfiguration configuration) {
-        this.configuration = configuration;
+        super(configuration);
     }
     
     /**
@@ -45,7 +43,7 @@ public class ReMergeTool {
         MergeContext context = new MergeContext(basePath, currentPath, otherPath, currentPath.toString());
         
         // Find a pipeline that applies to this file
-        Pipeline pipeline = MergeUtil.findPipeline(configuration, context);
+        Pipeline pipeline = MergeUtil.findPipeline(getConfiguration(), context);
         if (pipeline == null) {
             logger.error("No pipeline found for re-merge");
             return false;

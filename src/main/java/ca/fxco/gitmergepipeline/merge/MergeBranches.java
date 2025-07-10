@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,10 +27,8 @@ import java.util.List;
  *
  * @author FX
  */
-public class MergeBranches {
+public class MergeBranches extends Merger {
     private static final Logger logger = LoggerFactory.getLogger(MergeBranches.class);
-
-    private final PipelineConfiguration configuration;
 
     /**
      * Creates a new merge with the specified configuration.
@@ -39,7 +36,7 @@ public class MergeBranches {
      * @param configuration The pipeline configuration to use
      */
     public MergeBranches(PipelineConfiguration configuration) {
-        this.configuration = configuration;
+        super(configuration);
     }
 
     /**
@@ -94,7 +91,8 @@ public class MergeBranches {
                 }
             }
 
-            List<DiffEntry> changedFiles = GitUtils.getChangedFiles(repo, baseCommit, branchCommits);
+            PipelineConfiguration configuration = getConfiguration();
+            List<DiffEntry> changedFiles = GitUtils.getChangedFiles(configuration, repo, baseCommit, branchCommits);
             logger.info("Merging {} files across {} branches.", changedFiles.size(), branches.size());
 
             for (DiffEntry diff : changedFiles) {

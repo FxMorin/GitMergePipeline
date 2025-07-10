@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.utils;
 
+import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.ObjectId;
@@ -63,13 +64,15 @@ public class GitUtils {
     /**
      * Gets the list of changed files between the given commits.
      *
-     * @param repo     The repository to look in
-     * @param base     The base commit to compare against
-     * @param branches The commits to compare against the base commit
+     * @param configuration The pipeline configuration to use for filtering files
+     * @param repo          The repository to look in
+     * @param base          The base commit to compare against
+     * @param branches      The commits to compare against the base commit
      * @return The list of changed files
      * @throws IOException If an I/O error occurs when traversing through the commits
      */
-    public static List<DiffEntry> getChangedFiles(Repository repo, RevCommit base, List<RevCommit> branches)
+    public static List<DiffEntry> getChangedFiles(PipelineConfiguration configuration, Repository repo, RevCommit base,
+                                                  List<RevCommit> branches)
             throws IOException {
         Set<String> seenPaths = new HashSet<>();
         List<DiffEntry> allDiffs = new ArrayList<>();
@@ -85,6 +88,9 @@ public class GitUtils {
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                      DiffFormatter diffFormatter = new DiffFormatter(out)) {
                     diffFormatter.setRepository(repo);
+                    diffFormatter.setBinaryFileThreshold(configuration.binaryFileThreshold());
+                    diffFormatter.setDetectRenames(configuration.detectRenames());
+                    diffFormatter.setPathFilter(configuration.getCombinedFilter());
                     List<DiffEntry> diffs = diffFormatter.scan(baseTree, branchTree);
                     for (DiffEntry diff : diffs) {
                         String path = diff.getNewPath();

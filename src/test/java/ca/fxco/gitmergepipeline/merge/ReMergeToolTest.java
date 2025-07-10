@@ -79,7 +79,7 @@ class ReMergeToolTest {
         };
 
         // Create a configuration with the mock pipelines
-        configuration = new PipelineConfiguration(new HashMap<>(), Arrays.asList(successPipeline, failurePipeline));
+        configuration = PipelineConfiguration.onlyPipelines(successPipeline, failurePipeline);
 
         // Create the re-merge tool
         reMergeTool = new ReMergeTool(configuration);
@@ -97,10 +97,7 @@ class ReMergeToolTest {
     @Test
     void remergeWithFailingPipeline() throws IOException {
         // Create a configuration with only the failure pipeline
-        PipelineConfiguration failureConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Collections.singletonList(configuration.getPipelines().get(1))
-        );
+        PipelineConfiguration failureConfig = PipelineConfiguration.onlyPipelines(configuration.getPipelines().get(1));
 
         ReMergeTool failureTool = new ReMergeTool(failureConfig);
 
@@ -147,10 +144,7 @@ class ReMergeToolTest {
         };
 
         // Create a configuration with the pipelines
-        PipelineConfiguration ruleConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Arrays.asList(javaPipeline, txtPipeline)
-        );
+        PipelineConfiguration ruleConfig = PipelineConfiguration.onlyPipelines(javaPipeline, txtPipeline);
 
         ReMergeTool ruleTool = new ReMergeTool(ruleConfig);
 

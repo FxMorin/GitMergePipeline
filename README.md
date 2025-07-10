@@ -245,6 +245,10 @@ GitMergePipeline comes with the following built-in merge operations:
 - `keep-base`: Uses the base version of the file, ignoring the current and other version
 - `command-line-merge`: Executes a specified command line to perform the merge
 
+## Built-in Filters
+
+TODO
+
 ### Using Command Line Merge
 
 The `command-line-merge` operation allows you to specify an external command or script to handle merges. The command can include the following placeholders:
@@ -286,6 +290,12 @@ You can extend GitMergePipeline with custom pipelines by implementing the `Pipel
 ## Extending with Custom Rules
 
 You can extend GitMergePipeline with custom rules by implementing the `Rule` interface and using a Java ServiceLoader mechanism for the `RuleClassSupplier` interface.
+
+## Extending with Custom Filters
+
+You can extend GitMergePipeline with custom filters by implementing the `Filter` interface and using a Java ServiceLoader mechanism for the `FilterClassSupplier` interface.  
+
+You can also add extra MimeType's to the `MimeTypeFilter` by adding `FileTypeDetector`'s with the Java's built-in ServiceLoader.
 
 ## License
 

@@ -15,10 +15,8 @@ import java.nio.file.Path;
  *
  * @author FX
  */
-public class MergeTool {
+public class MergeTool extends Merger {
     private static final Logger logger = LoggerFactory.getLogger(MergeTool.class);
-    
-    private final PipelineConfiguration configuration;
     
     /**
      * Creates a new merge tool with the specified configuration.
@@ -26,7 +24,7 @@ public class MergeTool {
      * @param configuration The pipeline configuration to use
      */
     public MergeTool(PipelineConfiguration configuration) {
-        this.configuration = configuration;
+        super(configuration);
     }
     
     /**
@@ -45,7 +43,7 @@ public class MergeTool {
         MergeContext context = MergeContext.forMergeTool(localPath, remotePath, mergedPath);
         
         // Find a pipeline that applies to this file
-        Pipeline pipeline = MergeUtil.findPipeline(configuration, context);
+        Pipeline pipeline = MergeUtil.findPipeline(getConfiguration(), context);
         if (pipeline == null) {
             logger.error("No pipeline found for merge tool");
             return false;

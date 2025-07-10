@@ -15,10 +15,8 @@ import java.nio.file.Path;
  *
  * @author FX
  */
-public class MergeDriver {
+public class MergeDriver extends Merger {
     private static final Logger logger = LoggerFactory.getLogger(MergeDriver.class);
-    
-    private final PipelineConfiguration configuration;
     
     /**
      * Creates a new merge driver with the specified configuration.
@@ -26,7 +24,7 @@ public class MergeDriver {
      * @param configuration The pipeline configuration to use
      */
     public MergeDriver(PipelineConfiguration configuration) {
-        this.configuration = configuration;
+        super(configuration);
     }
     
     /**
@@ -46,7 +44,7 @@ public class MergeDriver {
         MergeContext context = new MergeContext(basePath, currentPath, otherPath, filePath);
         
         // Find a pipeline that applies to this file
-        Pipeline pipeline = MergeUtil.findPipeline(configuration, context);
+        Pipeline pipeline = MergeUtil.findPipeline(getConfiguration(), context);
         if (pipeline == null) {
             logger.error("No pipeline found for file: {}", filePath);
             return false;

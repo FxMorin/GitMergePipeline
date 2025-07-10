@@ -79,7 +79,7 @@ class MergeToolTest {
         };
 
         // Create a configuration with the mock pipelines
-        configuration = new PipelineConfiguration(new HashMap<>(), Arrays.asList(successPipeline, failurePipeline));
+        configuration = PipelineConfiguration.onlyPipelines(successPipeline, failurePipeline);
 
         // Create the merge tool
         mergeTool = new MergeTool(configuration);
@@ -98,10 +98,7 @@ class MergeToolTest {
     @Test
     void mergeWithFailingPipeline() throws IOException {
         // Create a configuration with only the failure pipeline
-        PipelineConfiguration failureConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Collections.singletonList(configuration.getPipelines().get(1))
-        );
+        PipelineConfiguration failureConfig = PipelineConfiguration.onlyPipelines(configuration.getPipelines().get(1));
 
         MergeTool failureTool = new MergeTool(failureConfig);
 
@@ -147,10 +144,7 @@ class MergeToolTest {
         };
 
         // Create a configuration with the pipelines
-        PipelineConfiguration ruleConfig = new PipelineConfiguration(
-                new HashMap<>(),
-                Arrays.asList(javaPipeline, txtPipeline)
-        );
+        PipelineConfiguration ruleConfig = PipelineConfiguration.onlyPipelines(javaPipeline, txtPipeline);
 
         MergeTool ruleTool = new MergeTool(ruleConfig);
 
