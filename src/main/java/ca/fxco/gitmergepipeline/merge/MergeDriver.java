@@ -2,7 +2,6 @@ package ca.fxco.gitmergepipeline.merge;
 
 import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
-import ca.fxco.gitmergepipeline.utils.MergeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ public class MergeDriver extends Merger {
         MergeContext context = new MergeContext(basePath, currentPath, otherPath, filePath);
         
         // Find a pipeline that applies to this file
-        Pipeline pipeline = MergeUtil.findPipeline(getConfiguration(), context);
+        Pipeline pipeline = getConfiguration().findPipeline(context);
         if (pipeline == null) {
             logger.error("No pipeline found for file: {}", filePath);
             return false;

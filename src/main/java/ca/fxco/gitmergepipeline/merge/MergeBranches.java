@@ -3,7 +3,6 @@ package ca.fxco.gitmergepipeline.merge;
 import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.utils.GitUtils;
-import ca.fxco.gitmergepipeline.utils.MergeUtil;
 import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -103,7 +102,7 @@ public class MergeBranches extends Merger {
                 for (RevCommit commit : branchCommits) {
                     Path otherPath = GitUtils.checkoutFile(repo, commit, filePath);
                     MergeContext context = new MergeContext(basePath, currentPath, otherPath, filePath);
-                    Pipeline pipeline = MergeUtil.findPipeline(configuration, context);
+                    Pipeline pipeline = configuration.findPipeline(context);
 
                     if (pipeline == null) {
                         logger.error("No pipeline found for file: " + filePath);

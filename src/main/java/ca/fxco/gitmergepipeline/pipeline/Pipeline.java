@@ -25,6 +25,17 @@ import java.util.List;
 public interface Pipeline {
 
     /**
+     * If this pipeline matches the given merge context, returns true.<br>
+     * The pipeline will still run if this method returns false, if it's the first pipeline.
+     *
+     * @param fileNameContext The merge context to check
+     * @return {@code true} if the pipeline matches, otherwise {@code false}
+     */
+    default boolean matchesFileRule(MergeContext fileNameContext) {
+        return false;
+    }
+
+    /**
      * Executes the pipeline on the given merge context.
      * 
      * @param context The merge context to execute the pipeline on

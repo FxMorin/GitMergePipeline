@@ -4,6 +4,7 @@ import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeOperation;
 import ca.fxco.gitmergepipeline.merge.MergeOperationRegistry;
 import ca.fxco.gitmergepipeline.merge.MergeResult;
+import ca.fxco.gitmergepipeline.rule.FilePatternRule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
@@ -60,6 +61,18 @@ public class StandardPipeline implements Pipeline {
      */
     public List<Step> getSteps() {
         return steps;
+    }
+
+    @Override
+    public boolean matchesFileRule(MergeContext fileNameContext) {
+        // Check if the pipeline has a file pattern rule that matches the file path
+        for (Pipeline.Step step : steps) {
+            if (step.getRule() instanceof FilePatternRule filePatternRule &&
+                    filePatternRule.applies(fileNameContext)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override
