@@ -49,6 +49,28 @@ class ConfigurationLoaderTest {
                      {
                        "type": "fileMode",
                        "mode": "regular"
+                     },
+                     {
+                       "type": "mimeType",
+                       "mimeType": "image/png"
+                     },
+                     {
+                       "type": "not",
+                       "filter": {
+                         "type": "or",
+                         "filters": [
+                           {
+                             "type": "filePattern",
+                             "pattern": "*contains*"
+                           },
+                           {
+                             "type": "filePattern",
+                             "pattern": ".*me.*",
+                             "isRegex": true,
+                             "caseSensitive": true
+                           }
+                         ]
+                       }
                      }
                    ],
                    "rules": {
@@ -59,10 +81,28 @@ class ConfigurationLoaderTest {
                        "caseSensitive": false
                      },
                      "xmlFiles": {
-                       "type": "filePattern",
-                       "pattern": "*.xml",
+                       "type": "fileExtension",
+                       "extensions": ["xml"],
+                       "invert": false
+                     },
+                     "random1": {
+                       "type": "composite",
+                       "operation": "OR",
                        "isRegex": false,
-                       "caseSensitive": false
+                       "rules": [
+                         {
+                           "type": "mimeType",
+                           "mimeType": "text/plain"
+                         },
+                         {
+                           "type": "contentPattern",
+                           "pattern": ".*something cool.*",
+                           "caseSensitive": false,
+                           "checkBase": false,
+                           "checkCurrent": true,
+                           "checkOther": true
+                         }
+                       ]
                      }
                    },
                    "pipelines": [
@@ -170,6 +210,9 @@ class ConfigurationLoaderTest {
                            {
                              "operation": "take-other",
                              "parameters": []
+                           },
+                           {
+                             "operation": "keep-base"
                            }
                          ]
                        }
@@ -238,7 +281,7 @@ class ConfigurationLoaderTest {
         assertNotNull(configuration);
 
         Map<String, Rule> rules = configuration.getRules();
-        assertEquals(2, rules.size());
+        assertEquals(3, rules.size());
         assertTrue(rules.containsKey("javaFiles"));
         assertInstanceOf(FilePatternRule.class, rules.get("javaFiles"));
 
