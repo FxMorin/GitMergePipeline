@@ -66,6 +66,8 @@ public class RuleRegistry {
         registerRule("filePattern", FilePatternRule.class);
         registerRule("contentPattern", ContentPatternRule.class);
         registerRule("composite", CompositeRule.class);
+        registerRule("mimeType", MimeTypeRule.class);
+        registerRule("fileExtension", FileExtensionRule.class);
     }
 
     /**
