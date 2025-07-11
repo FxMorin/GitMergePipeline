@@ -57,6 +57,7 @@ public class MergeBranches extends Merger {
             // Get commits
             List<RevCommit> branchCommits = new ArrayList<>();
             try (RevWalk revWalk = new RevWalk(repo)) {
+                revWalk.setRetainBody(false);
                 for (String branch : branches) {
                     ObjectId branchId = repo.resolve(branch);
                     if (branchId == null) {
@@ -77,6 +78,7 @@ public class MergeBranches extends Merger {
                     return false;
                 }
                 try (RevWalk revWalk = new RevWalk(repo)) {
+                    revWalk.setRetainBody(false);
                     baseCommit = revWalk.parseCommit(baseId);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
