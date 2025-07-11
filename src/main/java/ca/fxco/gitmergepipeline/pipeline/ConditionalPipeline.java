@@ -1,10 +1,12 @@
 package ca.fxco.gitmergepipeline.pipeline;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeResult;
 import ca.fxco.gitmergepipeline.rule.Rule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +91,27 @@ public class ConditionalPipeline implements Pipeline {
         logger.debug("No branch rule applies and no default pipeline, returning success");
         return MergeResult.success("No branch rule applies and no default pipeline", null);
     }
-    
+
+    @Override
+    public MergeResult executeBatched(Git git, GitMergeContext context) throws IOException {
+        logger.debug("Executing conditional pipeline: {}", name);
+
+        for (Branch branch : branches) {
+            if (branch.getRule().applies(context)) {
+                logger.debug("Branch rule applies, executing pipeline: {}", branch.getPipeline().getDescription());
+                return branch.getPipeline().executeBatched(git, context);
+            }
+        }
+
+        if (defaultPipeline != null) {
+            logger.debug("No branch rule applies, executing default pipeline: {}", defaultPipeline.getDescription());
+            return defaultPipeline.executeBatched(git, context);
+        }
+
+        logger.debug("No branch rule applies and no default pipeline, returning success");
+        return MergeResult.success("No branch rule applies and no default pipeline", null);
+    }
+
     @Override
     public String getDescription() {
         return "Conditional pipeline: " + name;

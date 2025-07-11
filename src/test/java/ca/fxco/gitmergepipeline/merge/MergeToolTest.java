@@ -4,6 +4,7 @@ import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.pipeline.StandardPipeline;
 import ca.fxco.gitmergepipeline.rule.FilePatternRule;
+import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -60,6 +61,18 @@ class MergeToolTest {
             }
 
             @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
+                try {
+                    // Write to the merged file to simulate a successful merge
+                    Path mergedPath = (Path) context.getAttribute("mergedPath");
+                    Files.writeString(mergedPath, "Merged content");
+                    return MergeResult.success("Success from mock pipeline", mergedPath);
+                } catch (IOException e) {
+                    return MergeResult.error("Error writing to merged file", e);
+                }
+            }
+
+            @Override
             public String getDescription() {
                 return "Success Pipeline";
             }
@@ -69,6 +82,11 @@ class MergeToolTest {
         Pipeline failurePipeline = new Pipeline() {
             @Override
             public MergeResult execute(MergeContext context) {
+                return MergeResult.error("Failure from mock pipeline", new RuntimeException("Test failure"));
+            }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
                 return MergeResult.error("Failure from mock pipeline", new RuntimeException("Test failure"));
             }
 

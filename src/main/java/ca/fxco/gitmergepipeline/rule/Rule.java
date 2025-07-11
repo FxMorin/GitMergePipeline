@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -24,6 +25,14 @@ public interface Rule {
      * @return true if the rule applies, false otherwise
      */
     boolean applies(MergeContext context);
+
+    /**
+     * Evaluates whether this rule applies to the given git merge context.
+     *
+     * @param context The git merge context to evaluate
+     * @return true if the rule applies, false otherwise
+     */
+    boolean applies(GitMergeContext context);
     
     /**
      * Gets a description of this rule.

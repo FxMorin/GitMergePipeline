@@ -1,10 +1,8 @@
 package ca.fxco.gitmergepipeline.pipeline;
 
-import ca.fxco.gitmergepipeline.merge.MergeContext;
-import ca.fxco.gitmergepipeline.merge.MergeOperation;
-import ca.fxco.gitmergepipeline.merge.MergeOperationRegistry;
-import ca.fxco.gitmergepipeline.merge.MergeResult;
+import ca.fxco.gitmergepipeline.merge.*;
 import ca.fxco.gitmergepipeline.rule.Rule;
+import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +49,11 @@ class FallbackPipelineTest {
             }
 
             @Override
+            public boolean applies(GitMergeContext context) {
+                return true;
+            }
+
+            @Override
             public String getDescription() {
                 return "Always applies";
             }
@@ -59,6 +62,11 @@ class FallbackPipelineTest {
         neverAppliesRule = new Rule() {
             @Override
             public boolean applies(MergeContext context) {
+                return false;
+            }
+
+            @Override
+            public boolean applies(GitMergeContext context) {
                 return false;
             }
 
@@ -84,6 +92,11 @@ class FallbackPipelineTest {
             public MergeResult execute(MergeContext context, List<String> parameters) {
                 return MergeResult.success("Success", null);
             }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context, List<String> parameters) {
+                return MergeResult.success("Success", null);
+            }
         };
 
         MergeOperation failureOperation = new MergeOperation() {
@@ -101,6 +114,11 @@ class FallbackPipelineTest {
             public MergeResult execute(MergeContext context, List<String> parameters) {
                 return MergeResult.error("Failure", new RuntimeException("Test failure"));
             }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context, List<String> parameters) {
+                return MergeResult.error("Failure", new RuntimeException("Test failure"));
+            }
         };
 
         MergeOperation conflictOperation = new MergeOperation() {
@@ -116,6 +134,11 @@ class FallbackPipelineTest {
 
             @Override
             public MergeResult execute(MergeContext context, List<String> parameters) {
+                return MergeResult.conflict("Conflict");
+            }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context, List<String> parameters) {
                 return MergeResult.conflict("Conflict");
             }
         };

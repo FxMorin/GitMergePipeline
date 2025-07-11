@@ -1,12 +1,10 @@
 package ca.fxco.gitmergepipeline.pipeline;
 
-import ca.fxco.gitmergepipeline.merge.MergeContext;
-import ca.fxco.gitmergepipeline.merge.MergeOperation;
-import ca.fxco.gitmergepipeline.merge.MergeOperationRegistry;
-import ca.fxco.gitmergepipeline.merge.MergeResult;
+import ca.fxco.gitmergepipeline.merge.*;
 import ca.fxco.gitmergepipeline.rule.FilePatternRule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +72,18 @@ public class StandardPipeline implements Pipeline {
         }
         return false;
     }
+
+    @Override
+    public boolean matchesFileRule(GitMergeContext fileNameContext) {
+        // Check if the pipeline has a file pattern rule that matches the file path
+        for (Pipeline.Step step : steps) {
+            if (step.getRule() instanceof FilePatternRule filePatternRule &&
+                    filePatternRule.applies(fileNameContext)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     @Override
     public MergeResult execute(MergeContext context) throws IOException {
@@ -105,6 +115,40 @@ public class StandardPipeline implements Pipeline {
             }
         }
         
+        logger.debug("Pipeline executed successfully");
+        return MergeResult.success("Pipeline executed successfully", null);
+    }
+
+    @Override
+    public MergeResult executeBatched(Git git, GitMergeContext context) {
+        logger.debug("Executing pipeline: {}", name);
+
+        for (Step step : steps) {
+            if (step.applies(context)) {
+                logger.debug("Executing step with operation: {}", step.getOperation());
+
+                MergeOperation operation = operationRegistry.getOperation(step.getOperation());
+                if (operation == null) {
+                    logger.error("Unknown operation: {}", step.getOperation());
+                    return MergeResult.error("Unknown operation: " + step.getOperation(), null);
+                }
+
+                try {
+                    MergeResult result = operation.executeBatched(git, context, step.getParameters());
+
+                    if (!result.isSuccess()) {
+                        logger.debug("Pipeline step failed: {}", result.getMessage());
+                        return result;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error executing operation: {}", step.getOperation(), e);
+                    return MergeResult.error("Error executing operation: " + step.getOperation(), e);
+                }
+            } else {
+                logger.debug("Skipping step with operation: {} (rule does not apply)", step.getOperation());
+            }
+        }
+
         logger.debug("Pipeline executed successfully");
         return MergeResult.success("Pipeline executed successfully", null);
     }

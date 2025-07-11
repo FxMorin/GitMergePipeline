@@ -90,6 +90,11 @@ class MergeBranchesTest {
             }
 
             @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
+                return MergeResult.success("Success from mock pipeline", null);
+            }
+
+            @Override
             public String getDescription() {
                 return "Success Pipeline";
             }
@@ -99,6 +104,11 @@ class MergeBranchesTest {
         Pipeline failurePipeline = new Pipeline() {
             @Override
             public MergeResult execute(MergeContext context) {
+                return MergeResult.error("Failure from mock pipeline", new RuntimeException("Test failure"));
+            }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
                 return MergeResult.error("Failure from mock pipeline", new RuntimeException("Test failure"));
             }
 
@@ -175,6 +185,11 @@ class MergeBranchesTest {
         StandardPipeline txtPipeline = new StandardPipeline("Txt Pipeline", Collections.singletonList(txtStep), null) {
             @Override
             public MergeResult execute(MergeContext context) {
+                return MergeResult.success("Success from txt pipeline", null);
+            }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
                 return MergeResult.success("Success from txt pipeline", null);
             }
         };

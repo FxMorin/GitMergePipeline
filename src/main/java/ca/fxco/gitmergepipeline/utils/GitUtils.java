@@ -132,6 +132,29 @@ public class GitUtils {
     }
 
     /**
+     * Checks out a file from a commit.
+     *
+     * @param repo    The repository to look in
+     * @param gitPath The git path to the file to check out
+     * @return The path to the checked-out file
+     * @throws IOException If an I/O error occurs when traversing through the repo
+     */
+    public static Path checkoutFile(Repository repo, GitPath gitPath) throws IOException {
+        String path = gitPath.getPath().toString();
+        Path tempFile = Files.createTempFile("mergefile-", "-" + path.replace('/', '_'));
+        try (TreeWalk treeWalk = TreeWalk.forPath(repo, path, gitPath.getCommit().getTree())) {
+            if (treeWalk == null) {
+                return tempFile; // File doesn't exist in this commit
+            }
+            ObjectId blobId = treeWalk.getObjectId(0);
+            Files.write(tempFile, repo.open(blobId).getBytes());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return tempFile;
+    }
+
+    /**
      * Copies a file from source to target within the working directory.
      * Ensures the parent directories exist.
      *

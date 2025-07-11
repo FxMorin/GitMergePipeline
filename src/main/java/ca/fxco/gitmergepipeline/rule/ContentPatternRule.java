@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -138,6 +139,29 @@ public class ContentPatternRule implements Rule {
             }
         }
         
+        return false;
+    }
+
+    @Override
+    public boolean applies(GitMergeContext context) {
+        if (checkBase && context.getBasePath() != null) {
+            if (matchesContent(context.getBasePath().getPath())) {
+                return true;
+            }
+        }
+
+        if (checkCurrent && context.getCurrentPath() != null) {
+            if (matchesContent(context.getCurrentPath().getPath())) {
+                return true;
+            }
+        }
+
+        if (checkOther && context.getOtherPath() != null) {
+            if (matchesContent(context.getOtherPath().getPath())) {
+                return true;
+            }
+        }
+
         return false;
     }
     

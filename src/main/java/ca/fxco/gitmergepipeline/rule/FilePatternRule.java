@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.utils.FileUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -85,6 +86,12 @@ public class FilePatternRule implements Rule {
 
     @Override
     public boolean applies(MergeContext context) {
+        String filePath = context.getFilePath();
+        return compiledPattern.matcher(filePath).matches();
+    }
+
+    @Override
+    public boolean applies(GitMergeContext context) {
         String filePath = context.getFilePath();
         return compiledPattern.matcher(filePath).matches();
     }

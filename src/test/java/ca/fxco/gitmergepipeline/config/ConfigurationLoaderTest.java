@@ -153,8 +153,8 @@ class ConfigurationLoaderTest {
                              "isRegex": false,
                              "caseSensitive": false
                            },
-                           "operation": "take-current",
-                           "parameters": []
+                           "operation": "git-merge",
+                           "parameters": ["theirs"]
                          }
                        ]
                      },
@@ -196,8 +196,8 @@ class ConfigurationLoaderTest {
                                  "parameters": ["recursive"]
                                },
                                {
-                                 "operation": "take-current",
-                                 "parameters": []
+                                 "operation": "git-merge",
+                                 "parameters": ["ours"]
                                }
                              ]
                            }
@@ -208,11 +208,12 @@ class ConfigurationLoaderTest {
                          "name": "Default Config Pipeline",
                          "steps": [
                            {
-                             "operation": "take-other",
-                             "parameters": []
+                             "operation": "git-merge",
+                             "parameters": ["octopus"]
                            },
                            {
-                             "operation": "keep-base"
+                             "operation": "git-merge",
+                             "parameters": ["ours"]
                            }
                          ]
                        }

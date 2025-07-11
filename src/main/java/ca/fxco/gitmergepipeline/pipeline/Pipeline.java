@@ -1,11 +1,13 @@
 package ca.fxco.gitmergepipeline.pipeline;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeResult;
 import ca.fxco.gitmergepipeline.rule.Rule;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.eclipse.jgit.api.Git;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +38,17 @@ public interface Pipeline {
     }
 
     /**
+     * If this pipeline matches the given git merge context, returns true.<br>
+     * The pipeline will still run if this method returns false, if it's the first pipeline.
+     *
+     * @param fileNameContext The git merge context to check
+     * @return {@code true} if the pipeline matches, otherwise {@code false}
+     */
+    default boolean matchesFileRule(GitMergeContext fileNameContext) {
+        return false;
+    }
+
+    /**
      * Executes the pipeline on the given merge context.
      * 
      * @param context The merge context to execute the pipeline on
@@ -43,6 +56,16 @@ public interface Pipeline {
      * @throws IOException If there's an error during the merge
      */
     MergeResult execute(MergeContext context) throws IOException;
+
+    /**
+     * Executes the pipeline on the given git merge context.
+     *
+     * @param git     The git instance to execute the pipeline on
+     * @param context The merge context to execute the pipeline on
+     * @return The result of the merge operation
+     * @throws IOException If there's an error during the merge
+     */
+    MergeResult executeBatched(Git git, GitMergeContext context) throws IOException;
 
     /**
      * Gets a description of this pipeline.
@@ -108,9 +131,19 @@ public interface Pipeline {
          * Checks whether this step applies to the given merge context.
          * 
          * @param context The merge context to check
-         * @return true if the step applies, false otherwise
+         * @return {@code true} if the step applies, otherwise {@code false}
          */
         public boolean applies(MergeContext context) {
+            return rule == null || rule.applies(context);
+        }
+
+        /**
+         * Checks whether this step applies to the given git merge context.
+         *
+         * @param context The git merge context to check
+         * @return {@code true} if the step applies, otherwise {@code false}
+         */
+        public boolean applies(GitMergeContext context) {
             return rule == null || rule.applies(context);
         }
     }

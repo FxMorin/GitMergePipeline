@@ -1,8 +1,10 @@
 package ca.fxco.gitmergepipeline.pipeline;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeResult;
 import ca.fxco.gitmergepipeline.rule.Rule;
+import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +48,11 @@ class ConditionalPipelineTest {
             }
 
             @Override
+            public boolean applies(GitMergeContext context) {
+                return true;
+            }
+
+            @Override
             public String getDescription() {
                 return "Always applies";
             }
@@ -54,6 +61,11 @@ class ConditionalPipelineTest {
         neverAppliesRule = new Rule() {
             @Override
             public boolean applies(MergeContext context) {
+                return false;
+            }
+
+            @Override
+            public boolean applies(GitMergeContext context) {
                 return false;
             }
 
@@ -71,6 +83,11 @@ class ConditionalPipelineTest {
             }
 
             @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
+                return MergeResult.success("Success from mock pipeline", null);
+            }
+
+            @Override
             public String getDescription() {
                 return "Success Pipeline";
             }
@@ -79,6 +96,11 @@ class ConditionalPipelineTest {
         failurePipeline = new Pipeline() {
             @Override
             public MergeResult execute(MergeContext context) {
+                return MergeResult.error("Failure from mock pipeline", new RuntimeException("Test failure"));
+            }
+
+            @Override
+            public MergeResult executeBatched(Git git, GitMergeContext context) {
                 return MergeResult.error("Failure from mock pipeline", new RuntimeException("Test failure"));
             }
 

@@ -2,6 +2,7 @@ package ca.fxco.gitmergepipeline.merge;
 
 import ca.fxco.gitmergepipeline.config.PipelineConfiguration;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
+import ca.fxco.gitmergepipeline.utils.GitPath;
 import ca.fxco.gitmergepipeline.utils.GitUtils;
 import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.api.Git;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,12 +100,13 @@ public class MergeBranches extends Merger {
 
             for (DiffEntry diff : changedFiles) {
                 String filePath = diff.getNewPath();
-                Path basePath = GitUtils.checkoutFile(repo, baseCommit, filePath);
+                Path target = Path.of(repoDir.getPath() + "/" + filePath);
+                GitPath basePath = new GitPath(baseCommit, target);
 
-                Path currentPath = basePath;
+                GitPath currentPath = basePath;
                 for (RevCommit commit : branchCommits) {
-                    Path otherPath = GitUtils.checkoutFile(repo, commit, filePath);
-                    MergeContext context = new MergeContext(basePath, currentPath, otherPath, filePath);
+                    GitPath otherPath = new GitPath(commit, target);
+                    GitMergeContext context = new GitMergeContext(basePath, currentPath, otherPath, filePath);
                     Pipeline pipeline = configuration.findPipeline(context);
 
                     if (pipeline == null) {
@@ -111,21 +114,26 @@ public class MergeBranches extends Merger {
                         return false;
                     }
 
-                    MergeResult result = pipeline.execute(context);
+                    MergeResult result = pipeline.executeBatched(git, context);
                     if (!result.isSuccess()) {
                         logger.error("Merge conflict in file: " + filePath);
                         return false;
                     }
 
                     if (result.getOutputPath() != null) {
-                        currentPath = result.getOutputPath();
+                        if (result instanceof GitMergeResult gitMergeResult) {
+                            currentPath = new GitPath(gitMergeResult.getCommit(), result.getOutputPath());
+                        } else {
+                            currentPath = new GitPath(currentPath.getCommit(), result.getOutputPath());
+                        }
                     }
                 }
 
                 // Final merged result is in currentPath
-                Path target = Path.of(filePath);
                 if (diff.getChangeType() != DiffEntry.ChangeType.DELETE) { // Target = /dev/null
-                    GitUtils.copyFileToWorkingDirectory(currentPath, target);
+                    if (Files.exists(currentPath.getPath())) { // TODO: Figure out why this happens
+                        GitUtils.copyFileToWorkingDirectory(currentPath.getPath(), target);
+                    }
                 }
             }
         } catch (IOException e) {

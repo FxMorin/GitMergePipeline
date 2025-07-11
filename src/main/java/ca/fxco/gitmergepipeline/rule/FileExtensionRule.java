@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,6 +33,17 @@ public class FileExtensionRule implements Rule {
 
     @Override
     public boolean applies(MergeContext context) {
+        String extension = context.getFileExtension();
+        for (String ext : extensions) {
+            if (ext.equals(extension)) {
+                return !invert;
+            }
+        }
+        return invert;
+    }
+
+    @Override
+    public boolean applies(GitMergeContext context) {
         String extension = context.getFileExtension();
         for (String ext : extensions) {
             if (ext.equals(extension)) {

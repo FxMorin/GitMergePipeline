@@ -1,6 +1,7 @@
 package ca.fxco.gitmergepipeline.config;
 
 import ca.fxco.gitmergepipeline.filter.Filter;
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.pipeline.Pipeline;
 import ca.fxco.gitmergepipeline.rule.Rule;
@@ -190,6 +191,44 @@ public class PipelineConfiguration {
                 ? filePath.substring(Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')) + 1)
                 : filePath;
         MergeContext fileNameContext = new MergeContext(
+                context.getBasePath(),
+                context.getCurrentPath(),
+                context.getOtherPath(),
+                fileName
+        );
+        // Copy all attributes from the original context
+        for (Map.Entry<String, Object> entry : context.getAttributes().entrySet()) {
+            fileNameContext.setAttribute(entry.getKey(), entry.getValue());
+        }
+
+        // Try to find a pipeline with a file pattern rule that matches the file path
+        for (Pipeline pipeline : pipelines) {
+            if (pipeline.matchesFileRule(fileNameContext)) {
+                return pipeline;
+            }
+        }
+
+        // If no pipeline with a matching file pattern rule is found, use the first pipeline
+        if (!pipelines.isEmpty()) {
+            return pipelines.getFirst();
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds a pipeline that applies to the given merge context.
+     *
+     * @param context The merge context to find a pipeline for
+     * @return The pipeline to use, or null if no pipeline applies
+     */
+    public @Nullable Pipeline findPipeline(GitMergeContext context) {
+        // Create a new context with just the filename for matching file pattern rules
+        String filePath = context.getFilePath();
+        String fileName = filePath.contains("/") || filePath.contains("\\")
+                ? filePath.substring(Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')) + 1)
+                : filePath;
+        GitMergeContext fileNameContext = new GitMergeContext(
                 context.getBasePath(),
                 context.getCurrentPath(),
                 context.getOtherPath(),

@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,6 +38,15 @@ public class MimeTypeRule implements Rule {
 
     @Override
     public boolean applies(MergeContext context) {
+        try {
+            return mimeType.equals(Files.probeContentType(Path.of(context.getFilePath())));
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean applies(GitMergeContext context) {
         try {
             return mimeType.equals(Files.probeContentType(Path.of(context.getFilePath())));
         } catch (IOException e) {

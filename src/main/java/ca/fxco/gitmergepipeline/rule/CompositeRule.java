@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -88,6 +89,29 @@ public class CompositeRule implements Rule {
     
     @Override
     public boolean applies(MergeContext context) {
+        return switch (operation) {
+            case AND -> {
+                for (Rule rule : rules) {
+                    if (!rule.applies(context)) {
+                        yield false;
+                    }
+                }
+                yield !rules.isEmpty();
+            }
+            case OR -> {
+                for (Rule rule : rules) {
+                    if (rule.applies(context)) {
+                        yield true;
+                    }
+                }
+                yield false;
+            }
+            case NOT -> !rules.getFirst().applies(context);
+        };
+    }
+
+    @Override
+    public boolean applies(GitMergeContext context) {
         return switch (operation) {
             case AND -> {
                 for (Rule rule : rules) {

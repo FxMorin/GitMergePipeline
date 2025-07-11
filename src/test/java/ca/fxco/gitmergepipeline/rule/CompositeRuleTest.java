@@ -1,5 +1,6 @@
 package ca.fxco.gitmergepipeline.rule;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,11 @@ class CompositeRuleTest {
             }
 
             @Override
+            public boolean applies(GitMergeContext context) {
+                return true;
+            }
+
+            @Override
             public String getDescription() {
                 return "Always applies";
             }
@@ -49,6 +55,11 @@ class CompositeRuleTest {
         neverAppliesRule = new Rule() {
             @Override
             public boolean applies(MergeContext context) {
+                return false;
+            }
+
+            @Override
+            public boolean applies(GitMergeContext context) {
                 return false;
             }
 

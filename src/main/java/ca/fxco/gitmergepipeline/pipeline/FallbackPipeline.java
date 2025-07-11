@@ -1,11 +1,9 @@
 package ca.fxco.gitmergepipeline.pipeline;
 
-import ca.fxco.gitmergepipeline.merge.MergeContext;
-import ca.fxco.gitmergepipeline.merge.MergeOperation;
-import ca.fxco.gitmergepipeline.merge.MergeOperationRegistry;
-import ca.fxco.gitmergepipeline.merge.MergeResult;
+import ca.fxco.gitmergepipeline.merge.*;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +80,58 @@ public class FallbackPipeline implements Pipeline {
 
                 try {
                     MergeResult result = operation.execute(context, step.getParameters());
+                    lastResult = result;
+
+                    if (result.isSuccess()) {
+                        logger.debug("Pipeline step succeeded: {}", result.getMessage());
+                        return result; // Return on first success
+                    } else {
+                        logger.debug("Pipeline step failed: {}, trying next step", result.getMessage());
+                    }
+                } catch (Exception e) {
+                    logger.error("Error executing operation: {}", step.getOperation(), e);
+                    lastResult = MergeResult.error("Error executing operation: " + step.getOperation(), e);
+                    // Continue to the next step
+                }
+            } else {
+                logger.debug("Skipping step with operation: {} (rule does not apply)", step.getOperation());
+            }
+        }
+
+        if (lastResult != null) {
+            logger.debug("All pipeline steps failed, returning last result: {}", lastResult.getMessage());
+            return lastResult;
+        } else {
+            // Check if there are no steps or no applicable steps
+            if (steps.isEmpty()) {
+                logger.debug("No steps to execute");
+                return MergeResult.success("No steps to execute", null);
+            } else {
+                logger.debug("No applicable steps found");
+                return MergeResult.success("No applicable steps found", null);
+            }
+        }
+    }
+
+    @Override
+    public MergeResult executeBatched(Git git, GitMergeContext context) {
+        logger.debug("Executing fallback pipeline: {}", name);
+
+        MergeResult lastResult = null;
+
+        for (Step step : steps) {
+            if (step.applies(context)) {
+                logger.debug("Executing step with operation: {}", step.getOperation());
+
+                MergeOperation operation = operationRegistry.getOperation(step.getOperation());
+                if (operation == null) {
+                    logger.error("Unknown operation: {}", step.getOperation());
+                    lastResult = MergeResult.error("Unknown operation: " + step.getOperation(), null);
+                    continue; // Try the next step
+                }
+
+                try {
+                    MergeResult result = operation.executeBatched(git, context, step.getParameters());
                     lastResult = result;
 
                     if (result.isSuccess()) {

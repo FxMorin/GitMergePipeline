@@ -1,5 +1,7 @@
 package ca.fxco.gitmergepipeline.merge;
 
+import org.eclipse.jgit.api.Git;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -28,10 +30,21 @@ public interface MergeOperation {
     /**
      * Executes the operation on the given merge context.
      * 
-     * @param context The merge context to execute the operation on
+     * @param context    The merge context to execute the operation on
      * @param parameters Parameters for the operation
      * @return The result of the operation
      * @throws IOException If there's an error during the operation
      */
     MergeResult execute(MergeContext context, List<String> parameters) throws IOException;
+
+    /**
+     * Executes the operation on the given git merge context.
+     *
+     * @param git        The git instance to execute the operation on
+     * @param context    The git merge context to execute the operation on
+     * @param parameters Parameters for the operation
+     * @return The result of the operation
+     * @throws IOException If there's an error during the operation
+     */
+    MergeResult executeBatched(Git git, GitMergeContext context, List<String> parameters) throws IOException;
 }

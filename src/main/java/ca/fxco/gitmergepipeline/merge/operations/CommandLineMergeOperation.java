@@ -1,8 +1,12 @@
 package ca.fxco.gitmergepipeline.merge.operations;
 
+import ca.fxco.gitmergepipeline.merge.GitMergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeContext;
 import ca.fxco.gitmergepipeline.merge.MergeOperation;
 import ca.fxco.gitmergepipeline.merge.MergeResult;
+import ca.fxco.gitmergepipeline.utils.GitUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,6 +152,25 @@ public class CommandLineMergeOperation implements MergeOperation {
             logger.error("Error executing command", e);
             return MergeResult.error("Error executing command: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public MergeResult executeBatched(Git git, GitMergeContext context, List<String> parameters) throws IOException {
+        MergeContext mergeContext = new MergeContext(
+                context.getBasePath().getPath(),
+                context.getCurrentPath().getPath(),
+                context.getOtherPath().getPath(),
+                context.getFilePath()
+        );
+        mergeContext.getAttributes().putAll(context.getAttributes());
+
+        Repository repo = git.getRepository();
+        GitUtils.checkoutFile(repo, context.getBasePath());
+        GitUtils.checkoutFile(repo, context.getCurrentPath()); // TODO: This file should exist, reuse it
+        GitUtils.checkoutFile(repo, context.getOtherPath());
+
+        // Can't run command-line merge in batched mode yet!
+        return execute(mergeContext, parameters);
     }
 
     /**
